@@ -1,0 +1,29 @@
+.my-masonry-grid {
+    display: flex;
+    margin-left: -16px;
+    /* Adjust based on desired gutter */
+    width: auto;
+}
+
+.my-masonry-grid_column {
+    padding-left: 16px;
+    /* Matches margin-left for consistent gutter */
+    background-clip: padding-box;
+}
+
+.my-masonry-grid_column>div {
+    margin-bottom: 16px;
+    /* Space between cards */
+}
+
+.hover-video {
+    display: none;
+}
+
+.media-container:hover .hover-video {
+    display: block;
+}
+
+.media-container:hover .media-thumbnail {
+    display: none;
+}
