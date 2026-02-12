@@ -8,7 +8,7 @@ interface RequestOptions {
 }
 
 const handleRequest = async <T>(
-    method: "get" | "post",
+    method: "get" | "post" | "put" | "delete",
     url: string,
     SERVER_URL: AxiosInstance,
     options?: RequestOptions
@@ -21,7 +21,16 @@ const handleRequest = async <T>(
             params: method === "get" ? options?.params : undefined,
         };
 
-        const response = await SERVER_URL[method](url, method === "get" ? axiosConfig : options?.payload, method === "get" ? undefined : axiosConfig);
+        let response: any;
+        if (method === "get") {
+            response = await SERVER_URL.get(url, axiosConfig);
+        } else if (method === "delete") {
+            response = await SERVER_URL.delete(url, axiosConfig);
+        } else if (method === "post") {
+            response = await SERVER_URL.post(url, options?.payload, axiosConfig);
+        } else {
+            response = await SERVER_URL.put(url, options?.payload, axiosConfig);
+        }
         responseEntity.success(response.data?.body, 200, response.data?.message);
     } catch (error: any) {
         const response = error?.response;
@@ -51,4 +60,21 @@ export const handlePostRequest = async <T>(
     headers?: Record<string, string>
 ): Promise<ResponseEntity<T>> => {
     return handleRequest<T>("post", url, SERVER_URL, { payload, headers });
+};
+
+export const handlePutRequest = async <T>(
+    url: string,
+    payload: any,
+    SERVER_URL: AxiosInstance,
+    headers?: Record<string, string>
+): Promise<ResponseEntity<T>> => {
+    return handleRequest<T>("put", url, SERVER_URL, { payload, headers });
+};
+
+export const handleDeleteRequest = async <T>(
+    url: string,
+    SERVER_URL: AxiosInstance,
+    headers?: Record<string, string>
+): Promise<ResponseEntity<T>> => {
+    return handleRequest<T>("delete", url, SERVER_URL, { headers });
 };

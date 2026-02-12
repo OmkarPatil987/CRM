@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS activities (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    activity_uuid VARCHAR(36) NOT NULL UNIQUE,
+    title VARCHAR(255) NOT NULL,
+    type ENUM('call', 'meeting', 'email', 'note') NOT NULL,
+    description TEXT,
+    related_type ENUM('lead', 'deal', 'contact') NOT NULL,
+    related_id INT NOT NULL,
+    scheduled_at DATETIME,
+    status ENUM('pending', 'completed') DEFAULT 'pending',
+    owner_id INT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at DATETIME DEFAULT NULL,
+    FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE SET NULL,
+    INDEX idx_owner_id (owner_id),
+    INDEX idx_scheduled_at (scheduled_at),
+    INDEX idx_status (status),
+    INDEX idx_related (related_type, related_id)
+);

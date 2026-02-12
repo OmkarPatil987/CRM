@@ -68,5 +68,13 @@ func SetupRouter(ctl *app.Controllers) *gin.Engine {
 		deal.POST("/update-stage", ctl.Deal.UpdateStage)
 	}
 
+	activity := r.Group("/activities", middleware.TokenAuthentication())
+	{
+		activity.GET("", ctl.Activity.List)
+		activity.POST("", ctl.Activity.Create)
+		activity.PUT("/:id", ctl.Activity.Update)
+		activity.DELETE("/:id", ctl.Activity.Delete)
+	}
+
 	return r
 }
