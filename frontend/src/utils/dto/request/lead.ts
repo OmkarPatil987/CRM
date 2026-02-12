@@ -3,6 +3,10 @@ export type LeadCreateRequest = {
     mobile: string;
     email?: string;
     enquiry_text?: string;
+    follow_up_status?: string;
+    follow_up_remark?: string;
+    next_follow_up_date?: string;
+    next_follow_up_time?: string;
 };
 
 export type LeadListRequest = {
@@ -13,7 +17,8 @@ export type LeadListRequest = {
 };
 
 export type LeadDetailsRequest = {
-    id: number;
+    id?: number;
+    lead_uuid?: string;
 };
 
 export type LeadStatusUpdateRequest = {

@@ -35,6 +35,11 @@ func (s *contactService) Create(req dto.ContactCreateRequest) (*dto.ContactRespo
 		Status:      req.Status,
 		VIP:         req.VIP,
 		Address:     req.Address,
+		OwnerID:     req.OwnerID,
+		LeadID:      req.LeadID,
+		DealID:      req.DealID,
+		Tags:        req.Tags,
+		Notes:       req.Notes,
 		CreatedAt:   now,
 		UpdatedAt:   now,
 	}
@@ -54,6 +59,11 @@ func (s *contactService) Create(req dto.ContactCreateRequest) (*dto.ContactRespo
 		Status:      contact.Status,
 		VIP:         contact.VIP,
 		Address:     contact.Address,
+		OwnerID:     contact.OwnerID,
+		LeadID:      contact.LeadID,
+		DealID:      contact.DealID,
+		Tags:        contact.Tags,
+		Notes:       contact.Notes,
 		CreatedAt:   contact.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:   contact.UpdatedAt.Format(time.RFC3339),
 	}, nil
@@ -93,6 +103,21 @@ func (s *contactService) Update(req dto.ContactUpdateRequest) error {
 	if req.Address != "" {
 		contact.Address = req.Address
 	}
+	if req.OwnerID != nil {
+		contact.OwnerID = req.OwnerID
+	}
+	if req.LeadID != nil {
+		contact.LeadID = req.LeadID
+	}
+	if req.DealID != nil {
+		contact.DealID = req.DealID
+	}
+	if req.Tags != "" {
+		contact.Tags = req.Tags
+	}
+	if req.Notes != "" {
+		contact.Notes = req.Notes
+	}
 	contact.UpdatedAt = time.Now()
 
 	return s.repo.Update(contact)
@@ -121,6 +146,11 @@ func (s *contactService) Details(id int) (*dto.ContactResponse, error) {
 		Status:      contact.Status,
 		VIP:         contact.VIP,
 		Address:     contact.Address,
+		OwnerID:     contact.OwnerID,
+		LeadID:      contact.LeadID,
+		DealID:      contact.DealID,
+		Tags:        contact.Tags,
+		Notes:       contact.Notes,
 		CreatedAt:   contact.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:   contact.UpdatedAt.Format(time.RFC3339),
 	}, nil

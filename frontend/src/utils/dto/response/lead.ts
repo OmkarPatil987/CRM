@@ -6,6 +6,7 @@ export type LeadListItem = {
     status: string;
     created_at: string;
     id: number;
+    lead_uuid: string;
 };
 
 export type LeadDetails = {

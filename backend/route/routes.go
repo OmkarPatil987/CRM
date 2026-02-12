@@ -57,5 +57,16 @@ func SetupRouter(ctl *app.Controllers) *gin.Engine {
 		contact.POST("/delete", ctl.Contact.Delete)
 	}
 
+	// Deal Routes
+	deal := r.Group("/deal", middleware.TokenAuthentication())
+	{
+		deal.POST("/create", ctl.Deal.Create)
+		deal.POST("/update", ctl.Deal.Update)
+		deal.POST("/delete", ctl.Deal.Delete)
+		deal.POST("/details", ctl.Deal.Details)
+		deal.POST("/list", ctl.Deal.List)
+		deal.POST("/update-stage", ctl.Deal.UpdateStage)
+	}
+
 	return r
 }

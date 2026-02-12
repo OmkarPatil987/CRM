@@ -26,16 +26,16 @@ export const NAVIGATE_MODULES = {
 
 export const NAVIGATE_ADMIN = {
     DASHBAORD: '/dashboard',
-    PRODUCT :'/products',
-    PRODUCT_CREATE :'/products/create',
-    PRODUCT_DETAILS :'/products/details',
+    PRODUCT: '/products',
+    PRODUCT_CREATE: '/products/create',
+    PRODUCT_DETAILS: '/products/details',
     LEADS: '/leads',
     LEAD_CREATE: '/leads/create',
-    LEAD_DETAILS: '/leads/details',
+    LEAD_DETAILS: '/leads/details/:uuid',
     CONTACTS: '/contacts',
-    CONTACT_DETAILS: '/contacts/details',
+    CONTACT_DETAILS: '/contacts/details/:id',
     DEALS_PIPELINE: '/deals-pipeline',
-    DEAL_DETAILS: '/deals/details',
+    DEAL_DETAILS: '/deals/details/:id',
     ACTIVITIES: '/activities',
     ACTIVITY_DETAILS: '/activities/details',
     REPORTS: '/reports',
@@ -50,7 +50,10 @@ export const NAVIGATE_ADMIN = {
     get LEADS_PAGE() { return `${NAVIGATE_MODULES.ADMIN}${this.LEADS}`; },
     get LEAD_CREATE_PAGE() { return `${NAVIGATE_MODULES.ADMIN}${this.LEAD_CREATE}`; },
     get LEAD_DETAILS_PAGE() { return `${NAVIGATE_MODULES.ADMIN}${this.LEAD_DETAILS}`; },
-  
+    get CONTACTS_PAGE() { return `${NAVIGATE_MODULES.ADMIN}${this.CONTACTS}`; },
+    get CONTACT_DETAILS_PAGE() { return `${NAVIGATE_MODULES.ADMIN}${this.CONTACT_DETAILS}`; },
+    get DEALS_PAGE() { return `${NAVIGATE_MODULES.ADMIN}${this.DEALS_PIPELINE}`; },
+    get DEAL_DETAILS_PAGE() { return `${NAVIGATE_MODULES.ADMIN}${this.DEAL_DETAILS}`; },
 }
 
 export const UserTypeWisePagesConfig: Record<keyof typeof USER_TYPE, string[]> = {

@@ -9,6 +9,11 @@ type ContactCreateRequest struct {
 	Status      string `json:"status"`
 	VIP         bool   `json:"vip"`
 	Address     string `json:"address"`
+	OwnerID     *int   `json:"owner_id"`
+	LeadID      *int   `json:"lead_id"`
+	DealID      *int   `json:"deal_id"`
+	Tags        string `json:"tags"`
+	Notes       string `json:"notes"`
 }
 
 type ContactUpdateRequest struct {
@@ -21,6 +26,11 @@ type ContactUpdateRequest struct {
 	Status      string `json:"status"`
 	VIP         *bool  `json:"vip"`
 	Address     string `json:"address"`
+	OwnerID     *int   `json:"owner_id"`
+	LeadID      *int   `json:"lead_id"`
+	DealID      *int   `json:"deal_id"`
+	Tags        string `json:"tags"`
+	Notes       string `json:"notes"`
 }
 
 type ContactDetailsRequest struct {
@@ -32,11 +42,13 @@ type ContactDeleteRequest struct {
 }
 
 type ContactListRequest struct {
-	Page   int    `json:"page" validate:"required,min=1"`
-	Limit  int    `json:"limit" validate:"required,min=1"`
-	Search string `json:"search"`
-	Status string `json:"status"`
-	VIP    *bool  `json:"vip"`
+	Page    int    `json:"page" validate:"required,min=1"`
+	Limit   int    `json:"limit" validate:"required,min=1"`
+	Search  string `json:"search"`
+	Status  string `json:"status"`
+	VIP     *bool  `json:"vip"`
+	OwnerID *int   `json:"owner_id"`
+	Tags    string `json:"tags"`
 }
 
 type ContactResponse struct {
@@ -50,6 +62,11 @@ type ContactResponse struct {
 	Status      string `json:"status"`
 	VIP         bool   `json:"vip"`
 	Address     string `json:"address"`
+	OwnerID     *int   `json:"owner_id"`
+	LeadID      *int   `json:"lead_id"`
+	DealID      *int   `json:"deal_id"`
+	Tags        string `json:"tags"`
+	Notes       string `json:"notes"`
 	CreatedAt   string `json:"created_at"`
 	UpdatedAt   string `json:"updated_at"`
 }
@@ -63,5 +80,7 @@ type ContactListResponse struct {
 	Designation string `json:"designation"`
 	Status      string `json:"status"`
 	VIP         bool   `json:"vip"`
+	OwnerID     *int   `json:"owner_id"`
+	Tags        string `json:"tags"`
 	CreatedAt   string `json:"created_at"`
 }

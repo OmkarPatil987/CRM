@@ -30,6 +30,8 @@ func (r *contactRepo) Create(contact *model.Contact) error {
 }
 
 func (r *contactRepo) Update(contact *model.Contact) error {
+	// Use Updates to handle zero values if needed, or Save for full struct
+	// For partial updates, it's often safer to find and update, but service layer handles logic.
 	return database.DB.Save(contact).Error
 }
 
@@ -50,6 +52,7 @@ func (r *contactRepo) GetByID(id int) (*model.Contact, error) {
 
 func (r *contactRepo) GetByUUID(contactUUID string) (*model.Contact, error) {
 	var contact model.Contact
+	// Preload relationships if defined in model (e.g. Owner), but for now just fields
 	if err := database.DB.Where("contact_uuid = ? AND deleted_at IS NULL", contactUUID).First(&contact).Error; err != nil {
 		return nil, err
 	}
@@ -77,6 +80,14 @@ func (r *contactRepo) List(req dto.ContactListRequest) ([]dto.ContactListRespons
 	if req.VIP != nil {
 		q = q.Where("vip = ?", *req.VIP)
 	}
+	// New Filters
+	if req.OwnerID != nil {
+		q = q.Where("owner_id = ?", *req.OwnerID)
+	}
+	if req.Tags != "" {
+		// Simple LIKE search for tags (stored as comma-separated or JSON string)
+		q = q.Where("tags LIKE ?", "%"+req.Tags+"%")
+	}
 
 	if err := q.Count(&filtered).Error; err != nil {
 		return nil, 0, 0, err
@@ -97,6 +108,8 @@ func (r *contactRepo) List(req dto.ContactListRequest) ([]dto.ContactListRespons
 			Designation: c.Designation,
 			Status:      c.Status,
 			VIP:         c.VIP,
+			OwnerID:     c.OwnerID,
+			Tags:        c.Tags,
 			CreatedAt:   c.CreatedAt.Format(time.RFC3339),
 		})
 	}

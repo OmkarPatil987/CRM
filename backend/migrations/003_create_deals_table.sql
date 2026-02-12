@@ -1,0 +1,21 @@
+CREATE TABLE IF NOT EXISTS deals (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    deal_uuid VARCHAR(36) NOT NULL UNIQUE,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    amount DECIMAL(15, 2) DEFAULT 0.00,
+    stage ENUM('New', 'Qualified', 'Proposal', 'Negotiation', 'Won', 'Lost') DEFAULT 'New',
+    status ENUM('Open', 'Won', 'Lost') DEFAULT 'Open',
+    probability INT DEFAULT 0,
+    expected_close_date DATETIME,
+    contact_id INT,
+    lead_id INT,
+    owner_id INT,
+    notes TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at DATETIME,
+    FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE SET NULL,
+    FOREIGN KEY (lead_id) REFERENCES leads(id) ON DELETE SET NULL,
+    FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE SET NULL
+);

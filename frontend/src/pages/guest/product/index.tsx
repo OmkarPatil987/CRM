@@ -125,9 +125,9 @@ const GuestProductDetail: React.FC = () => {
     const { qr, product_master, product_detail, company } = data;
 
     return (
-        <Box sx={{bgcolor: '#f4f6f8', minHeight: '100vh' }}>
+        <Box sx={{ bgcolor: '#f4f6f8', minHeight: '100vh' }}>
 
-            <Box sx={{ maxWidth: '1200px', mx: 'auto',py:2 }}>
+            <Box sx={{ maxWidth: '1200px', mx: 'auto', py: 2 }}>
                 {/* Title Section */}
                 <Box sx={{ textAlign: 'center', mb: 6 }}>
                     <Chip
@@ -290,7 +290,7 @@ const GuestProductDetail: React.FC = () => {
                     </Grid>
                 </Grid>
 
-          
+
             </Box>
         </Box>
     );
