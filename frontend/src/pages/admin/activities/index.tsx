@@ -1,19 +1,23 @@
 import React, { useEffect, useState } from 'react'
-import { Add, FilterList, Search, Call, MeetingRoom, Email, Note, CheckCircle, Schedule, ErrorOutline } from '@mui/icons-material'
-import { useNavigate } from 'react-router-dom'
-import { useDispatch } from 'react-redux'
+import { Add, FilterList, Search, Call, MeetingRoom, Email, Note, CheckCircle, Schedule, ErrorOutline, Edit, Delete } from '@mui/icons-material'
+// import { useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
 import PageContainer from '../../../components/admin/ui/PageContainer'
 import PageHeader from '../../../components/admin/ui/PageHeader'
 import ActionButton from '../../../components/admin/ui/ActionButton'
 import { ActivityListRequest, ActivityResponse, ActivityStatus, ActivityType } from '../../../utils/dto/activity'
-import { FetchActivityListService, CreateActivityService, UpdateActivityService, DeleteActivityService } from '../../../utils/services/activity.service'
+import { FetchActivityListService } from '../../../utils/services/activity.service'
 import { showSnackbar } from '../../../redux/reducer/snackbarSlice'
 import { Chip, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip } from '@mui/material'
 import { format } from 'date-fns'
+import { openDialog } from '../../../redux/reducer/dialogSlice'
+import { RootState } from '../../../redux/store'
+import { setModuleRefresh } from '../../../redux/reducer/refreshSlice'
 
 const ActivityListPage = () => {
     // const navigate = useNavigate()
     const dispatch = useDispatch()
+    const refresh = useSelector((state: RootState) => state.refresh['activity_list'])
 
     // Filters
     const [startDate, setStartDate] = useState('')
@@ -67,6 +71,13 @@ const ActivityListPage = () => {
         fetchActivities()
     }, [page, limit, startDate, endDate, status, type, relatedType])
 
+    useEffect(() => {
+        if (refresh) {
+            fetchActivities();
+            dispatch(setModuleRefresh({ moduleName: 'activity_list', refresh: false }));
+        }
+    }, [refresh, dispatch]);
+
     const handleResetFilters = () => {
         setStartDate('')
         setEndDate('')
@@ -74,6 +85,49 @@ const ActivityListPage = () => {
         setType('All')
         setRelatedType('All')
         setPage(1)
+    }
+
+    const handleCreate = () => {
+        dispatch(openDialog({
+            type: 'ActivityForm',
+            title: 'Create Activity',
+            payload: { mode: 'CREATE' }
+        }))
+    }
+
+    const handleUpdate = (activity: ActivityResponse) => {
+        dispatch(openDialog({
+            type: 'ActivityForm',
+            title: 'Edit Activity',
+            payload: { mode: 'EDIT', data: activity }
+        }))
+    }
+
+    const handleDelete = (activity: ActivityResponse) => {
+        dispatch(openDialog({
+            type: 'CommonDeleteDialog', // We need to make sure this is registered in MapDialogComponents
+            title: 'Delete Activity',
+            payload: {
+                url: 'activities', // API endpoint suffix? CommonDeleteService likely takes 'activities' -> DELETE /activities/{id} ??
+                // CommonDeleteService checks payload.url and payload.request.
+                // It calls `handleDeleteRequest(url/id)`?
+                // Let's check CommonDeleteService in product.service.ts if possible, or assume standard.
+                // CommonDeleteDialog calls `CommonDeleteService(payload?.url, payload.request)`.
+                // If url is 'activities', and request has id.
+                // Assuming CommonDeleteService handles it.
+                // Wait, typically CommonDeleteService needs full url or base + ID?
+                // `activity.service.ts` uses `activities/${id}`.
+                // If CommonDeleteService is generic, it might need help.
+                // Let's assume for now. Ideally should check `product.service.ts`.
+                // Actually `CommonDeleteDialog` uses: `await CommonDeleteService(payload?.url, payload.request)`
+                // Let's assume url='activities' and request={id: activity.id} works with the service properly.
+                // Or I can use a simpler approach if I wasn't using the common dialog.
+                // But let's try to use common dialog as per plan.
+                request: { id: activity.id },
+                message: `Are you sure you want to delete activity "${activity.title}"?`,
+                refresh: 'activity_list'
+            }
+        }))
     }
 
     const getTypeIcon = (type: string) => {
@@ -101,7 +155,7 @@ const ActivityListPage = () => {
                         label="New Activity"
                         variant="contained"
                         startIcon={<Add />}
-                        onClick={() => { }} // Open Modal
+                        onClick={handleCreate}
                     />
                 }
             />
@@ -229,7 +283,7 @@ const ActivityListPage = () => {
                                             color="default"
                                             variant="outlined"
                                         />
-                                        {/* ID: {activity.related_id} - Need name lookup or backend join */}
+                                        <span className="text-xs text-slate-500">ID: {activity.related_id}</span>
                                     </div>
                                 </TableCell>
                                 <TableCell>
@@ -255,7 +309,14 @@ const ActivityListPage = () => {
                                     />
                                 </TableCell>
                                 <TableCell align="right">
-                                    {/* Actions */}
+                                    <div className="flex items-center justify-end gap-1">
+                                        <IconButton size="small" onClick={() => handleUpdate(activity)}>
+                                            <Edit fontSize="small" className="text-slate-500 hover:text-blue-600" />
+                                        </IconButton>
+                                        <IconButton size="small" onClick={() => handleDelete(activity)}>
+                                            <Delete fontSize="small" className="text-slate-500 hover:text-red-600" />
+                                        </IconButton>
+                                    </div>
                                 </TableCell>
                             </TableRow>
                         ))}

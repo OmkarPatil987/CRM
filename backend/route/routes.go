@@ -76,5 +76,10 @@ func SetupRouter(ctl *app.Controllers) *gin.Engine {
 		activity.DELETE("/:id", ctl.Activity.Delete)
 	}
 
+	dashboard := r.Group("/dashboard", middleware.TokenAuthentication())
+	{
+		dashboard.GET("/stats", ctl.Dashboard.GetStats)
+	}
+
 	return r
 }

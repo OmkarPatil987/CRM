@@ -6,11 +6,12 @@ import (
 )
 
 type Controllers struct {
-	User     controller.UserController
-	Lead     controller.LeadController
-	Contact  controller.ContactController
-	Deal     controller.DealController
-	Activity controller.ActivityController
+	User      controller.UserController
+	Lead      controller.LeadController
+	Contact   controller.ContactController
+	Deal      controller.DealController
+	Activity  controller.ActivityController
+	Dashboard controller.DashboardController
 }
 
 type App struct {
@@ -20,11 +21,12 @@ type App struct {
 func InitApp() *App {
 	return &App{
 		Controllers: &Controllers{
-			User:     controller.NewUserController(service.User),
-			Lead:     controller.NewLeadController(service.Lead),
-			Contact:  controller.NewContactController(service.Contact),
-			Deal:     controller.NewDealController(),
-			Activity: controller.NewActivityController(),
+			User:      controller.NewUserController(service.User),
+			Lead:      controller.NewLeadController(service.Lead),
+			Contact:   controller.NewContactController(service.Contact),
+			Deal:      controller.NewDealController(),
+			Activity:  controller.NewActivityController(),
+			Dashboard: controller.NewDashboardController(),
 		},
 	}
 }

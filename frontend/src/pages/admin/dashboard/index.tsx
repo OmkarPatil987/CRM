@@ -1,140 +1,130 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Box, Divider, Fab, Stack, Typography, useTheme } from '@mui/material'
-import { Add, AssignmentTurnedIn, MonetizationOn, Today, ErrorOutline } from '@mui/icons-material'
+import { Add, AssignmentTurnedIn, MonetizationOn, Today, ErrorOutline, Campaign, People, Contacts, LocalActivity } from '@mui/icons-material'
 import PageContainer from '../../../components/admin/ui/PageContainer'
 import PageHeader from '../../../components/admin/ui/PageHeader'
 import StatusChip from '../../../components/admin/ui/StatusChip'
 import SurfaceCard from '../../../components/admin/ui/SurfaceCard'
+import { DashboardStatsResponse } from '../../../utils/dto/dashboard'
+import { FetchDashboardStatsService } from '../../../utils/services/dashboard.service'
+import { showSnackbar } from '../../../redux/reducer/snackbarSlice'
+import { useDispatch } from 'react-redux'
+import { format } from 'date-fns'
 
 const DashboardPage = () => {
-  const theme = useTheme()
+    const theme = useTheme()
+    const dispatch = useDispatch()
+    const [stats, setStats] = useState<DashboardStatsResponse | null>(null)
+    const [loading, setLoading] = useState(false)
 
-  return (
-    <PageContainer>
-      <PageHeader title="Sales Dashboard" subtitle="Overview of current performance." />
+    useEffect(() => {
+        const fetchStats = async () => {
+            setLoading(true)
+            try {
+                const { code, data, message } = await FetchDashboardStatsService()
+                if (code === 200 && data) {
+                    setStats(data)
+                } else {
+                    dispatch(showSnackbar({ type: 'error', message: message || 'Failed to load dashboard stats' }))
+                }
+            } catch (error: any) {
+                dispatch(showSnackbar({ type: 'error', message: error.message || 'Error loading dashboard' }))
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchStats()
+    }, [dispatch])
 
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr', lg: 'repeat(4, 1fr)' }, gap: 3 }}>
-        {[
-          { label: 'My Open Deals', value: '24', chip: { label: '+12%', color: 'success' as const }, icon: <AssignmentTurnedIn /> },
-          { label: 'Deal Value', value: '$142,500', chip: { label: '+8%', color: 'success' as const }, icon: <MonetizationOn /> },
-          { label: 'Tasks Due Today', value: '8', chip: { label: 'Today', color: 'info' as const }, icon: <Today /> },
-          { label: 'Overdue Items', value: '3', chip: { label: 'High Priority', color: 'error' as const }, icon: <ErrorOutline /> },
-        ].map((item) => (
-          <SurfaceCard key={item.label}>
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-              <Stack direction="row" spacing={1.5} alignItems="center">
-                <Box
-                  sx={{
-                    width: theme.spacing(4),
-                    height: theme.spacing(4),
-                    borderRadius: theme.shape.borderRadius,
-                    bgcolor: 'action.hover',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'primary.main',
-                  }}
-                >
-                  {item.icon}
-                </Box>
-                <Typography variant="body2" color="text.secondary">
-                  {item.label.toUpperCase()}
-                </Typography>
-              </Stack>
-              <StatusChip label={item.chip.label} color={item.chip.color} />
-            </Stack>
-            <Typography variant="subtitle1">{item.value}</Typography>
-          </SurfaceCard>
-        ))}
-      </Box>
+    if (loading && !stats) {
+        return <PageContainer><PageHeader title="Dashboard" subtitle="Loading..." /></PageContainer>
+    }
 
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '2fr 1fr' }, gap: 3, mt: 3 }}>
-        <SurfaceCard>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-            <Box>
-              <Typography variant="subtitle1">Pipeline by Stage</Typography>
-              <Typography variant="caption" color="text.secondary">
-                Distribution of deals across your sales funnel
-              </Typography>
+    return (
+        <PageContainer>
+            <PageHeader title="CRM Dashboard" subtitle="Overview of your current performance." />
+
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr', lg: 'repeat(4, 1fr)' }, gap: 3 }}>
+                {[
+                    { label: 'Total Leads', value: stats?.total_leads || 0, icon: <Campaign />, color: 'primary.main' },
+                    { label: 'Total Deals', value: stats?.total_deals || 0, icon: <MonetizationOn />, color: 'success.main' },
+                    { label: 'Total Contacts', value: stats?.total_contacts || 0, icon: <Contacts />, color: 'info.main' },
+                    { label: 'Total Activities', value: stats?.total_activities || 0, icon: <LocalActivity />, color: 'warning.main' },
+                ].map((item) => (
+                    <SurfaceCard key={item.label}>
+                        <Stack direction="row" justifyContent="space-between" alignItems="center">
+                            <Stack direction="row" spacing={1.5} alignItems="center">
+                                <Box
+                                    sx={{
+                                        width: theme.spacing(5),
+                                        height: theme.spacing(5),
+                                        borderRadius: theme.shape.borderRadius,
+                                        bgcolor: `${item.color.split('.')[0]}.light`, // Simple opacity fallback
+                                        color: item.color,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        opacity: 0.8
+                                    }}
+                                >
+                                    {item.icon}
+                                </Box>
+                                <Typography variant="h6" color="text.secondary" sx={{ fontSize: '0.875rem', fontWeight: 600 }}>
+                                    {item.label}
+                                </Typography>
+                            </Stack>
+                        </Stack>
+                        <Box mt={2}>
+                            <Typography variant="h4" fontWeight="bold">{item.value}</Typography>
+                        </Box>
+                    </SurfaceCard>
+                ))}
             </Box>
-            <StatusChip label="Current Quarter" color="info" />
-          </Stack>
-          <Divider sx={{ mb: 2 }} />
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3, alignItems: 'center' }}>
-            <Box sx={{ position: 'relative', width: 160, height: 160, mx: 'auto' }}>
-              <Box
-                component="svg"
-                viewBox="0 0 100 100"
-                sx={{ width: '100%', height: '100%', transform: 'rotate(-90deg)' }}
-              >
-                <circle cx="50" cy="50" r="40" stroke={theme.palette.grey[200]} strokeWidth="12" fill="transparent" />
-                <circle cx="50" cy="50" r="40" stroke={theme.palette.primary.main} strokeWidth="12" strokeDasharray="251.2" strokeDashoffset="62.8" fill="transparent" />
-                <circle cx="50" cy="50" r="40" stroke={theme.palette.secondary.main} strokeWidth="12" strokeDasharray="251.2" strokeDashoffset="150" fill="transparent" />
-                <circle cx="50" cy="50" r="40" stroke={theme.palette.warning.main} strokeWidth="12" strokeDasharray="251.2" strokeDashoffset="210" fill="transparent" />
-              </Box>
-              <Box sx={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center' }}>
-                <Box sx={{ textAlign: 'center' }}>
-                  <Typography variant="subtitle1">$450k</Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Total
-                  </Typography>
-                </Box>
-              </Box>
+
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '2fr 1fr' }, gap: 3, mt: 3 }}>
+
+                {/* Recent Activities */}
+                <SurfaceCard>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
+                        <Typography variant="h6" fontWeight="bold">Recent Activities</Typography>
+                    </Stack>
+                    <Divider sx={{ mb: 2 }} />
+
+                    <Stack spacing={2}>
+                        {stats?.recent_activities?.length === 0 && <Typography color="text.secondary">No recent activities found.</Typography>}
+                        {stats?.recent_activities?.map((activity) => (
+                            <Stack key={activity.id} spacing={0.5} sx={{ p: 1, '&:hover': { bgcolor: 'action.hover', borderRadius: 1 } }}>
+                                <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between">
+                                    <Stack direction="row" spacing={1} alignItems="center">
+                                        <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'primary.main' }} />
+                                        <Typography variant="body2" fontWeight="medium">{activity.title}</Typography>
+                                    </Stack>
+                                    <Typography variant="caption" color="text.secondary">
+                                        {format(new Date(activity.scheduled_at), 'MMM dd, h:mm a')}
+                                    </Typography>
+                                </Stack>
+                                <Typography variant="caption" color="text.secondary" sx={{ pl: 2 }}>
+                                    {activity.type} - {activity.status}
+                                </Typography>
+                            </Stack>
+                        ))}
+                    </Stack>
+                </SurfaceCard>
+
+                {/* Placeholder for future charts or lists */}
+                <SurfaceCard>
+                    <Typography variant="h6" fontWeight="bold">Quick Actions</Typography>
+                    <Divider sx={{ my: 2 }} />
+                    <Stack spacing={2}>
+                        <Typography variant="body2" color="text.secondary">
+                            Manage your CRM directly from here.
+                        </Typography>
+                        {/* We can add quick action buttons here later */}
+                    </Stack>
+                </SurfaceCard>
             </Box>
-            <Stack spacing={2}>
-              {[
-                { label: 'Lead Stage', value: '$180,000', color: theme.palette.primary.main },
-                { label: 'Qualification', value: '$125,000', color: theme.palette.secondary.main },
-                { label: 'Proposal Sent', value: '$95,000', color: theme.palette.warning.main },
-                { label: 'Other', value: '$50,000', color: theme.palette.grey[400] },
-              ].map((row) => (
-                <Stack key={row.label} direction="row" justifyContent="space-between" alignItems="center">
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: row.color }} />
-                    <Typography variant="body2">{row.label}</Typography>
-                  </Stack>
-                  <Typography variant="body2">{row.value}</Typography>
-                </Stack>
-              ))}
-            </Stack>
-          </Box>
-        </SurfaceCard>
-
-        <SurfaceCard>
-          <Typography variant="subtitle1">Recent Activity</Typography>
-          <Divider sx={{ my: 2 }} />
-          <Stack spacing={2}>
-            {[
-              { title: 'Deal Closed: Acme Corp Hardware', meta: 'Closed by Alex Rivera for $12,400', time: '2 hours ago', color: 'success.main' },
-              { title: 'New Lead Added: Sarah Jenkins', meta: 'Inbound form via marketing site', time: '5 hours ago', color: 'info.main' },
-              { title: 'Email Sent: Proposal Follow-up', meta: 'Sent to Global Industries', time: 'Yesterday', color: 'warning.main' },
-              { title: 'Deal Updated: Project Solar', meta: "Moved from 'Lead' to 'Qualification'", time: 'Yesterday', color: 'text.secondary' },
-            ].map((item) => (
-              <Stack key={item.title} spacing={0.5}>
-                <Stack direction="row" spacing={1} alignItems="center">
-                  <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: item.color }} />
-                  <Typography variant="caption" color="text.secondary">
-                    {item.time}
-                  </Typography>
-                </Stack>
-                <Typography variant="body2">{item.title}</Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {item.meta}
-                </Typography>
-              </Stack>
-            ))}
-          </Stack>
-          <Stack direction="row" justifyContent="center" mt={2}>
-            <StatusChip label="View All Activity" color="info" />
-          </Stack>
-        </SurfaceCard>
-      </Box>
-
-      <Fab color="primary" sx={{ position: 'fixed', bottom: theme.spacing(4), right: theme.spacing(4) }}>
-        <Add />
-      </Fab>
-    </PageContainer>
-  )
+        </PageContainer>
+    )
 }
 
 export default DashboardPage

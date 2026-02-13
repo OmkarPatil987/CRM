@@ -100,10 +100,10 @@ func (s *activityService) List(req dto.ActivityListRequest) ([]dto.ActivityRespo
 	}
 
 	// Default 7 Days Logic: If date range is NOT provided, show last 7 days + future
-	if req.StartDate == "" && req.EndDate == "" {
-		last7Days := time.Now().AddDate(0, 0, -7).Format("2006-01-02")
-		req.StartDate = last7Days
-	}
+	// if req.StartDate == "" && req.EndDate == "" {
+	// 	last7Days := time.Now().AddDate(0, 0, -7).Format("2006-01-02")
+	// 	req.StartDate = last7Days
+	// }
 
 	activities, total, filtered, err := s.repo.List(req)
 	if err != nil {

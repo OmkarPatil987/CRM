@@ -21,14 +21,14 @@ type ActivityUpdateRequest struct {
 }
 
 type ActivityListRequest struct {
-	Page        int    `json:"page" validate:"required,min=1"`
-	Limit       int    `json:"limit" validate:"required,min=1"`
-	StartDate   string `json:"start_date"`
-	EndDate     string `json:"end_date"`
-	Status      string `json:"status"`       // pending, completed
-	Type        string `json:"type"`         // call, meeting, email, note
-	RelatedType string `json:"related_type"` // lead, deal, contact
-	OwnerID     *int   `json:"owner_id"`
+	Page        int    `json:"page" form:"page" validate:"required,min=1"`
+	Limit       int    `json:"limit" form:"limit" validate:"required,min=1"`
+	StartDate   string `json:"start_date" form:"start_date"`
+	EndDate     string `json:"end_date" form:"end_date"`
+	Status      string `json:"status" form:"status"`             // pending, completed
+	Type        string `json:"type" form:"type"`                 // call, meeting, email, note
+	RelatedType string `json:"related_type" form:"related_type"` // lead, deal, contact
+	OwnerID     *int   `json:"owner_id" form:"owner_id"`
 }
 
 type ActivityResponse struct {

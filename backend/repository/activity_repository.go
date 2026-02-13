@@ -55,7 +55,7 @@ func (r *activityRepo) List(req dto.ActivityListRequest) ([]model.Activity, int6
 	base := database.DB.Model(&model.Activity{})
 	base.Count(&total)
 
-	q := base
+	q := database.DB.Model(&model.Activity{})
 
 	// Filter Logic
 	if req.Type != "" {
