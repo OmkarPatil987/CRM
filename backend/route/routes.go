@@ -3,6 +3,7 @@ package route
 import (
 	"camp-backend/app"
 	"camp-backend/middleware"
+	"log"
 
 	"github.com/gin-gonic/gin"
 )
@@ -79,6 +80,20 @@ func SetupRouter(ctl *app.Controllers) *gin.Engine {
 	dashboard := r.Group("/dashboard", middleware.TokenAuthentication())
 	{
 		dashboard.GET("/stats", ctl.Dashboard.GetStats)
+	}
+
+	// Chat Routes
+	r.GET("/ws", ctl.Chat.ServeWs)
+	chat := r.Group("/chat", middleware.TokenAuthentication())
+	{
+		chat.GET("/conversations", ctl.Chat.GetConversations)
+		chat.GET("/history", ctl.Chat.GetHistory)
+		chat.POST("/start", ctl.Chat.StartConversation)
+	}
+
+	// Print routes for debugging
+	for _, route := range r.Routes() {
+		log.Printf("Route: %s %s", route.Method, route.Path)
 	}
 
 	return r

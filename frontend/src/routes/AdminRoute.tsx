@@ -27,6 +27,7 @@ import ReportsPage from '../pages/admin/reports';
 import DealDetailsPage from '../pages/admin/deals/DealDetails';
 import ActivityDetailsPage from '../pages/admin/activities/ActivityDetails';
 
+import ChatPage from '../pages/ChatPage'; // Import ChatPage
 
 // const DashboardPage = lazy(() => import('../pages/admin/dashboard'))
 
@@ -37,6 +38,10 @@ const AdminRoute = () => {
             <AdminLayout>
                 <Routes>
                     <Route path='*' element={<Error404 />} />
+
+                    {/* Chat Route */}
+                    <Route path="/messages" element={<ChatPage />} />
+
                     <Route path={NAVIGATE_ADMIN.DASHBAORD} element={<DashboardPage />} />
                     <Route path={NAVIGATE_ADMIN.LEADS} element={<LeadListPage />} />
                     <Route path={NAVIGATE_ADMIN.LEAD_CREATE} element={<LeadCreatePage />} />

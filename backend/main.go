@@ -24,6 +24,10 @@ func main() {
 	}
 
 	a := app.InitApp()
+
+	// Start the WebSocket Hub
+	go a.Hub.Run()
+
 	r := route.SetupRouter(a.Controllers)
 	port := os.Getenv("APP_PORT")
 	if port == "" {

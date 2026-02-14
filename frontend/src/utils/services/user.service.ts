@@ -9,7 +9,7 @@ export const StoreImplementingAgencyService = (payload: any) => handlePostReques
 
 export const FetchBankListService = (payload: any) => handlePostRequest<any>('bank-list', payload, CMRF_NGO_ADMIN_SERVER);
 
-export const FetchUserListService = (payload: any) => handlePostRequest<any>('user', payload, CMRF_NGO_ADMIN_SERVER);
+export const FetchUserListService = (payload: any) => handlePostRequest<any>('user/list', payload, CMRF_NGO_ADMIN_SERVER);
 
 //FetchUserTypeListService
 export const FetchUserTypeListService = (payload: any) => handlePostRequest<any>('user-type', payload, CMRF_NGO_ADMIN_SERVER);
