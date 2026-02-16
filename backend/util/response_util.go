@@ -32,3 +32,7 @@ func UnauthorizedResponse(c *gin.Context, message string) {
 func ErrorResponse(c *gin.Context, message string, body interface{}) {
 	c.JSON(http.StatusBadRequest, ResponseBody{Message: message, StatusCode: http.StatusBadRequest, Body: body})
 }
+
+func NotFoundResponse(c *gin.Context, message string) {
+	c.JSON(http.StatusNotFound, ResponseBody{Message: message, StatusCode: http.StatusNotFound})
+}

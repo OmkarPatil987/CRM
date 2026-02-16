@@ -15,6 +15,7 @@ type Controllers struct {
 	Activity  controller.ActivityController
 	Dashboard controller.DashboardController
 	Chat      *controller.ChatController
+	Payment   *controller.PaymentController
 }
 
 type App struct {
@@ -38,6 +39,7 @@ func InitApp() *App {
 			Activity:  controller.NewActivityController(),
 			Dashboard: controller.NewDashboardController(),
 			Chat:      controller.NewChatController(service.Chat, hub),
+			Payment:   controller.NewPaymentController(),
 		},
 	}
 }

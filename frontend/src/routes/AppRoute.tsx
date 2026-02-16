@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
+import PaymentPage from '../pages/PaymentPage';
 import LoaderText from '../components/loader/LoaderText';
 import { NAVIGATE_ADMIN, NAVIGATE_AUTH, USER_TYPE } from '../constant';
 import Error404 from '../pages/error/Error404';
@@ -18,7 +19,10 @@ const AppRoute = () => {
                 <Route path={`${NAVIGATE_AUTH.AUTH}/*`} element={<AuthRoute />}></Route>
                 <Route path={`${USER_TYPE.ADMIN}/*`} element={<SettingsProvider> <AdminRoute /></SettingsProvider>}></Route>
                 <Route path={USER_TYPE.ADMIN} element={<Navigate to={NAVIGATE_ADMIN.DASHBOARD_PAGE} />}></Route>
-                
+
+                {/* Public Payment Route */}
+                <Route path="/payment" element={<PaymentPage />} />
+
                 {[NAVIGATE_AUTH.LOGIN].map((path) => (
                     <Route key={path} path={path} element={<Navigate to={NAVIGATE_AUTH.LOGIN_PAGE} />} />
                 ))}

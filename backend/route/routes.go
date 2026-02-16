@@ -91,6 +91,13 @@ func SetupRouter(ctl *app.Controllers) *gin.Engine {
 		chat.POST("/start", ctl.Chat.StartConversation)
 	}
 
+	// Payment Routes (Public for now, or protected if needed)
+	payment := r.Group("/payment")
+	{
+		payment.POST("/create-order", ctl.Payment.CreateOrder)
+		payment.POST("/verify-payment", ctl.Payment.VerifyPayment)
+	}
+
 	// Print routes for debugging
 	for _, route := range r.Routes() {
 		log.Printf("Route: %s %s", route.Method, route.Path)
