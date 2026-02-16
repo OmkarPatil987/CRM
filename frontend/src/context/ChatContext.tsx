@@ -38,6 +38,8 @@ interface ChatContextType {
     loadHistory: (conversationId: number) => void;
     loadConversations: () => void;
     startChat: (recipientId: number) => void;
+    typingStatus: { [conversationId: number]: number[] }; // Map convId -> array of typing userIds
+    sendTyping: (isTyping: boolean) => void;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -55,6 +57,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [activeConversationId, setActiveConversationId] = useState<number | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
     const [isConnected, setIsConnected] = useState(false);
+    const [typingStatus, setTypingStatus] = useState<{ [key: number]: number[] }>({});
     const ws = useRef<WebSocket | null>(null);
 
     // Auth token mechanism
@@ -129,7 +132,36 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     return c;
                 });
             });
+        } else if (data.type === 'typing') {
+
+            // Ensure IDs are integers
+            const convId = parseInt(data.conversation_id);
+            const senderId = parseInt(data.sender_id);
+            const body = data.content;
+
+            // Ignore if it's the current user (echoed back)
+            const state = store.getState();
+            const currentUserId = state.authUser?.userDetails?.id;
+
+            if (senderId === currentUserId) return;
+
+            setTypingStatus(prev => {
+                const currentTypers = prev[convId] || [];
+                const isTyping = body === 'start';
+
+                if (isTyping) {
+                    if (!currentTypers.includes(senderId)) {
+                        return { ...prev, [convId]: [...currentTypers, senderId] };
+                    }
+                } else {
+                    if (currentTypers.includes(senderId)) {
+                        return { ...prev, [convId]: currentTypers.filter(id => id !== senderId) };
+                    }
+                }
+                return prev;
+            });
         }
+
     };
 
     const sendMessage = (content: string, recipientId: number) => {
@@ -220,6 +252,34 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     };
 
+    const sendTyping = (isTyping: boolean) => {
+        if (!ws.current || !isConnected || !activeConversationId) return;
+
+        // Find recipient - similar logic to sendMessage but optimized or reused?
+        // Actually, hub just needs conversation_id and it broadcasts. 
+        // We need recipient_id for the hub logic in client.go/hub.go if strictly required.
+        // client.go ReadPump -> hubs broadcast.
+        // Hub expects RecipientID for routing.
+
+        const conversation = conversations.find(c => c.id === activeConversationId);
+        if (!conversation) return;
+
+        const state = store.getState();
+        const currentUserId = state.authUser?.userDetails?.id;
+        const recipient = conversation.participants.find(p => p.user.id !== currentUserId);
+
+        if (!recipient) return;
+
+        const payload = {
+            type: 'typing',
+            content: isTyping ? 'start' : 'stop',
+            recipient_id: recipient.user.id,
+            conversation_id: activeConversationId
+        };
+
+        ws.current.send(JSON.stringify(payload));
+    };
+
     // Initial load
     useEffect(() => {
         if (token) loadConversations();
@@ -235,7 +295,9 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
             sendMessage,
             loadHistory,
             loadConversations,
-            startChat
+            startChat,
+            typingStatus,
+            sendTyping
         }}>
             {children}
         </ChatContext.Provider>

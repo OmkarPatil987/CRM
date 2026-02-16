@@ -15,7 +15,10 @@ export const ChatWindow: React.FC = () => {
         messages,
         sendMessage,
         loadHistory,
-        isConnected
+
+        isConnected,
+        typingStatus,
+        sendTyping
     } = useChat();
 
     const [inputValue, setInputValue] = useState('');
@@ -24,6 +27,8 @@ export const ChatWindow: React.FC = () => {
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const dateRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
     const [currentDateLabel, setCurrentDateLabel] = useState('Today');
+    const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const [localIsTyping, setLocalIsTyping] = useState(false);
 
     // Get current user ID from store
     const currentUserId = store.getState().authUser?.userDetails?.id;
@@ -130,7 +135,58 @@ export const ChatWindow: React.FC = () => {
         console.log("Sending message to recipient:", recipient.user.id);
         sendMessage(inputValue, recipient.user.id);
         setInputValue('');
+
+        // Stop typing immediately on send
+        if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+        setLocalIsTyping(false);
+        sendTyping(false);
     };
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setInputValue(e.target.value);
+
+        if (!localIsTyping) {
+            setLocalIsTyping(true);
+            sendTyping(true);
+        }
+
+        if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current);
+        }
+
+        typingTimeoutRef.current = setTimeout(() => {
+            setLocalIsTyping(false);
+            sendTyping(false);
+        }, 2000);
+    };
+
+    // Clean up typing on unmount or conversation change
+    useEffect(() => {
+        return () => {
+            if (localIsTyping) {
+                sendTyping(false);
+            }
+        };
+    }, [activeConversationId, localIsTyping]);
+
+    const typingText = useMemo(() => {
+        if (!activeConversationId) return null;
+        const typerIds = typingStatus[activeConversationId] || [];
+        if (typerIds.length === 0) return null;
+
+        const conversation = conversations.find(c => c.id === activeConversationId);
+        if (!conversation) return null;
+
+        const names = typerIds.map(id => {
+            const p = conversation.participants.find(p => p.user.id === id);
+            return p?.user.name ? p.user.name.split(' ')[0] : 'Someone';
+        });
+
+        if (names.length === 0) return null;
+        if (names.length === 1) return `${names[0]} is typing...`;
+        if (names.length === 2) return `${names[0]} and ${names[1]} are typing...`;
+        return `${names.length} people are typing...`;
+    }, [typingStatus, activeConversationId, conversations]);
 
     return (
         <div className="flex h-[calc(100vh-100px)] bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
@@ -162,8 +218,15 @@ export const ChatWindow: React.FC = () => {
                                     }`}
                             >
                                 <div className="font-medium text-gray-800">{otherUser?.name || 'Unknown'}</div>
-                                <div className="text-xs text-gray-500 truncate mt-1">
-                                    {conv.last_message?.content || 'No messages yet'}
+                                <div className="text-xs truncate mt-1">
+                                    {(() => {
+                                        const typerIds = typingStatus[conv.id] || [];
+                                        const isTyping = typerIds.some(id => id !== currentUserId);
+                                        if (isTyping) {
+                                            return <span className="text-green-600 font-medium animate-pulse">Typing...</span>;
+                                        }
+                                        return <span className="text-gray-500">{conv.last_message?.content || 'No messages yet'}</span>;
+                                    })()}
                                 </div>
                             </div>
                         );
@@ -212,6 +275,8 @@ export const ChatWindow: React.FC = () => {
                                 </div>
                             ))}
                             <div ref={messagesEndRef} />
+
+                            <div ref={messagesEndRef} />
                         </div>
 
                         {/* Input Area */}
@@ -222,7 +287,7 @@ export const ChatWindow: React.FC = () => {
                                     className="flex-1 border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                                     placeholder="Type a message..."
                                     value={inputValue}
-                                    onChange={(e) => setInputValue(e.target.value)}
+                                    onChange={handleInputChange}
                                     onKeyPress={(e) => e.key === 'Enter' && handleSend()}
                                 />
                                 <button
